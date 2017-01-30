@@ -4,6 +4,9 @@ import pygame
 x = np.random.rand(24)
 game = morris.GameState()
 done = False
-while not done:
-    _,_,done = game.frame_step(x)
-pygame.quit()
+try:
+    while not done:
+        _,_,done = game.frame_step(x)
+    pygame.quit()
+except KeyboardInterrupt:
+    pygame.quit()

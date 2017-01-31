@@ -6,6 +6,7 @@ import numpy as np
 import pygame
 from threading import Thread
 from time import sleep
+import ai
 
 GUI = True
 BACKGROUND = (90, 90, 90) # gray
@@ -41,26 +42,22 @@ def indexRight(i):
         return i+1
 def getCoords(i):
     return [coord_arr['x'][i], coord_arr['y'][i]]
-        
+def isInMill(board, i):
+    if i == -1:
+        return False
+    else:
+        return      (safeGet(indexAbove(i)) == safeGet(indexAbove(indexAbove(i))) == board[i] != 2) or \
+                    (safeGet(indexAbove(i)) == safeGet(indexBelow(i)) == board[i] != 2) or \
+                    (safeGet(indexBelow(i)) == safeGet(indexBelow(indexBelow(i))) == board[i] != 2) or \
+                    (safeGet(indexLeft(i)) == safeGet(indexLeft(indexLeft(i))) == board[i] != 2)  or \
+                    (safeGet(indexLeft(i)) == safeGet(indexRight(i)) == board[i] != 2)  or \
+                    (safeGet(indexRight(i)) == safeGet(indexRight(indexRight(i))) == board[i] != 2)
+def safeGet(board, i):
+    if i < 0 or i >= len(board):
+        return 2
+    return board[i]
+
 class GameState:
-    def isInMill(self, i):
-        if i == -1:
-            return False
-        else:
-            return      (self.safeGet(indexAbove(i)) == self.safeGet(indexAbove(indexAbove(i))) == self.board[i] != 2) or \
-                        (self.safeGet(indexAbove(i)) == self.safeGet(indexBelow(i)) == self.board[i] != 2) or \
-                        (self.safeGet(indexBelow(i)) == self.safeGet(indexBelow(indexBelow(i))) == self.board[i] != 2) or \
-                        (self.safeGet(indexLeft(i)) == self.safeGet(indexLeft(indexLeft(i))) == self.board[i] != 2)  or \
-                        (self.safeGet(indexLeft(i)) == self.safeGet(indexRight(i)) == self.board[i] != 2)  or \
-                        (self.safeGet(indexRight(i)) == self.safeGet(indexRight(indexRight(i))) == self.board[i] != 2)
-    def safeGet(self, i):
-        if i < 0 or i >= len(self.board):
-            return 2
-        try:
-            return self.board[i]
-        except IndexError:
-            return 2
-    
     def reset(self):
         self.board = np.zeros(24)
         self.opponent_num_pieces = 9
@@ -200,12 +197,12 @@ class GameState:
                 sleep(1)
             
             # If mill closed, remove best opponent piece
-            if self.isInMill(dest):
+            if isInMill(self.board, dest):
                 print('closed mill') # DEBUG
                 x = np.argsort(input_vect)
                 # best = best enemy field not in mill
                 i = -1
-                while self.board[x[i]] != -color or self.isInMill(x[i]):
+                while self.board[x[i]] != -color or isInMill(self.board, x[i]):
                     i-=1
                 best = x[i]
                 # Remove best piece
@@ -221,6 +218,6 @@ class GameState:
                     self.reset()
         
         if execute_opponent:
-            self.board, enemy_reward, terminal = self.frame_step(np.random.rand(24), execute_opponent=False, color=-1)
+            self.board, enemy_reward, terminal = ai.step(board, color=-1)
 
         return self.board, reward - enemy_reward, terminal

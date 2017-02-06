@@ -17,12 +17,12 @@ from collections import deque
 
 GAME = 'morris' # the name of the game being played for log files
 GAMMA = 0.9 # decay rate of past observations
-OBSERVE = 500. # timesteps to observe before training
-EXPLORE = 500. # frames over which to anneal epsilon
+OBSERVE = 10000. # timesteps to observe before training
+EXPLORE = 10000. # frames over which to anneal epsilon
 FINAL_EPSILON = 0.05 # final value of epsilon
 INITIAL_EPSILON = 1.0 # starting value of epsilon
 REPLAY_MEMORY = 1000 # number of previous transitions to remember
-BATCH = 32 # size of minibatch
+BATCH = 16 # size of minibatch
 
 def weight_variable(shape):
     initial = tf.truncated_normal(shape, stddev = 0.01)
@@ -72,12 +72,12 @@ def createNetwork():
         s = tf.placeholder("float", [None, 24], name='board-input')
 
     # layers
-    hidden1 = nn_layyer(s, 24, 512, 'layer1', act=tf.nn.relu)
+    hidden1 = nn_layer(s, 24, 512, 'layer1', act=tf.nn.relu)
     readout = nn_layer(hidden1, 512, 24, 'layer2', act=tf.identity)
 
-    return s, readout, h_fc1
+    return s, readout
     
-def trainNetwork(s, readout, h_fc1, sess):
+def trainNetwork(s, readout, sess):
     # define the cost function                                                              TODO!!!
     a = tf.placeholder("float", [None, 24])
     y = tf.placeholder("float", [None])
@@ -106,14 +106,14 @@ def trainNetwork(s, readout, h_fc1, sess):
     checkpoint = tf.train.get_checkpoint_state("saved_networks")
     if checkpoint and checkpoint.model_checkpoint_path:
         saver.restore(sess, checkpoint.model_checkpoint_path)
-        print "Successfully loaded:", checkpoint.model_checkpoint_path
+        print ("Successfully loaded:", checkpoint.model_checkpoint_path)
     else:
-        print "Could not find old network weights"
+        print ("Could not find old network weights")
 
     epsilon = INITIAL_EPSILON
     t = 0
     try:
-        while "pigs" != "fly" && t < 10000:
+        while "pigs" != "fly":
             # choose an action epsilon greedily
             a_t = readout.eval(feed_dict = {s : [s_t]})[0]
             if random.random() <= epsilon or t <= OBSERVE:
@@ -179,8 +179,8 @@ def trainNetwork(s, readout, h_fc1, sess):
             s_t = s_t1
             t += 1
 
-            # save progress every 10000 iterations
-            if t % 10000 == 0:
+            # save progress every 1000 iterations
+            if t % 1000 == 0:
                 saver.save(sess, 'morris/checkpoint morris-dqn', global_step = t)
 
             # print info
@@ -191,7 +191,7 @@ def trainNetwork(s, readout, h_fc1, sess):
                 state = "explore"
             else:
                 state = "train"
-            print "TIMESTEP", t, "/ STATE", state, "/ LINES", game_state.total_lines, "/ EPSILON", epsilon, "/ ACTION", action_index, "/ REWARD", r_t, "/ Q_MAX %e" % np.max(readout_t)
+            print ("TIMESTEP", t, "/ STATE", state, "/ EPSILON", epsilon, "/ REWARD", r_t)
     except KeyboardInterrupt:
         train_writer.close()
         
@@ -208,8 +208,8 @@ def trainNetwork(s, readout, h_fc1, sess):
         
 def playGame():
     sess = tf.InteractiveSession()
-    s, readout, h_fc1 = createNetwork()
-    trainNetwork(s, readout, h_fc1, sess)
+    s, readout = createNetwork()
+    trainNetwork(s, readout, sess)
 
 def main():
     playGame()

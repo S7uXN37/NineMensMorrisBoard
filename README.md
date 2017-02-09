@@ -1,6 +1,6 @@
 # Nine Men's Morris
 
-An AI for Nine Men's Morris, using MiniMax and Deep Q Networks
+An intelligent board for Nine Men's Morris, using MiniMax and Deep Q Networks controlling a physical board via a Raspberry Pi
 
 ## Concept
 

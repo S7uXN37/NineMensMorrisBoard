@@ -10,11 +10,14 @@ from time import sleep
 import ai
 
 # SETTINGS
-GUI = False
+GUI = True
 BACKGROUND = (90, 90, 90) # gray
 PLAYER1 = (240, 240, 240) # almost white
 PLAYER2 = (10, 10, 10) # almost black
 LINES = (255, 255, 255) # white
+
+PIECE_SIZE = 30
+SCALE = 40
 
 TAKE_PIECE_REWARD = 0.2
 WIN_REWARD = 1
@@ -40,9 +43,9 @@ def blockGetClickIndex():
     
     # look up piece
     for i in range(24):
-        dx = x - 50*getCoords(i)[0]
-        dy = y - 50*getCoords(i)[1]
-        if dx**2 + dy**2 <= 30**2: # x^2 + y^2 <= r^2
+        dx = x - SCALE*getCoords(i)[0]
+        dy = y - SCALE*getCoords(i)[1]
+        if dx**2 + dy**2 <= PIECE_SIZE**2: # x^2 + y^2 <= r^2
             return i
     
     return -1
@@ -107,7 +110,7 @@ class GameState:
         done = False
         # Init pygame
         pygame.init()
-        self.screen = pygame.display.set_mode((700, 700))
+        self.screen = pygame.display.set_mode((550, 550))
         pygame.display.set_caption("Nine Men's Morris")
         self.screen.fill(BACKGROUND)
         self.clock = pygame.time.Clock()
@@ -148,8 +151,8 @@ class GameState:
                 sys.exit(0)
         pygame.quit()
     def draw_line(self, start, end):
-        pygame.draw.line(self.screen, LINES, [x*50 for x in start], [x*50 for x in end], 10)
-        pygame.draw.line(self.screen, LINES, [x*50 for x in start[::-1]], [x*50 for x in end[::-1]], 10)
+        pygame.draw.line(self.screen, LINES, [x*SCALE for x in start], [x*SCALE for x in end], 10)
+        pygame.draw.line(self.screen, LINES, [x*SCALE for x in start[::-1]], [x*SCALE for x in end[::-1]], 10)
     def draw_piece(self, pos, value):
         if value != 0:
             color = None
@@ -157,8 +160,8 @@ class GameState:
                 color = PLAYER1
             else:
                 color = PLAYER2
-            pygame.draw.circle(self.screen, color, [x*50 for x in pos], 30)
-            pygame.draw.circle(self.screen, [x-10 for x in color], [x*50 for x in pos], 30, 5)
+            pygame.draw.circle(self.screen, color, [x*SCALE for x in pos], PIECE_SIZE)
+            pygame.draw.circle(self.screen, [x-10 for x in color], [x*SCALE for x in pos], PIECE_SIZE, int(PIECE_SIZE/6))
     
     def frame_step(self, input_vect, execute_opponent=True, skip_player=False, color=1):
         if color == 1:

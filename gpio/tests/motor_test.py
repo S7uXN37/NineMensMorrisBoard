@@ -17,7 +17,7 @@ def setStep(step):
 
 def forward(delay, steps):  
 	for i in range(0, steps):
-		if i==2:
+		if i==2 and False:
 			for j in range(0, len(seq)):
 				raw_input("Enter to continue...")
 				setStep(seq[j])

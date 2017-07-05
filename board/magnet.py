@@ -19,7 +19,7 @@ def turnOff():
     GPIO.output(ON_PIN, GPIO.LOW)
     
 def isOn():
-    #text
+    #TODO
 
 def reset():
     GPIO.output(DIR_PIN, GPIO.LOW)

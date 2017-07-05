@@ -14,7 +14,7 @@ while True:
 		desired_board = ai.calcMove(...)
 		for i in range(0,24):
 			if not new_board[i] == desired_board[i]:
-				#Move magnet, change board
+				#TODO: Move magnet, change board
 				print('found change at i=%i, resolving...' % i)
 	else:
 		time.sleep(2)

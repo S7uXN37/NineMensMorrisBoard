@@ -3,11 +3,12 @@ import RPi.GPIO as GPIO
 
 # Hardware SPI
 SPI_PORT = 0
-MCP = Adafruit_MCP3008.MCP3008(spi=SPI.SpiDev(SPI_PORT, 0))
-CS = [1,2,3]
+MCP = Adafruit_MCP3008.MCP3008(spi=SPI.SpiDev(SPI_PORT, 0))  # MCP object, make sure CE0 is open!
+CS = [1,2,3] # Manual CS activation
 
 GPIO.setmode(GPIO.BOARD)
-GPIO.setup(CS_EXTRA, GPIO.OUT, initial=GPIO.HIGH)
+for i in CS:
+    GPIO.setup(i, GPIO.OUT, initial=GPIO.HIGH)
 
 # Reads one MCP chip, pass MCP3008 object and CS pin
 def read_mcp(mcp, cs):

@@ -7,6 +7,8 @@ import time
 # SETTINGS
 LOG = False # Enables logging of timeTaken's
 
+
+# TODO MUST RETURN MOVES, NOT BOARD!
 def calcMove(board, color, pieces_self, pieces_opponent):
     global last_times
     
@@ -124,20 +126,20 @@ def moves_on_mill_closed(board, color):
     else:
         return allowed
 def value(board, color=1):
-    value = 0
+    v = 0
     fs = [morris.indexAbove, morris.indexBelow, morris.indexLeft, morris.indexRight]
     
     mills = 0
     for i in range(len(board)):
         if board[i] == color:
             # count pieces
-            value += 3
+            v += 3
             # count moves
             for f in fs:
                 index = f(i)
                 if index != -1:
                     if board[index] == 0:
-                        value += 0.1
+                        v += 0.1
             # count pieces in mills
             if morris.isInMill(board, i):
                 mills += 1
@@ -146,6 +148,6 @@ def value(board, color=1):
     if mills % 3 != 0: # round up to next multiple of 3
         mills += 3 - (mills % 3)
     mills /= 3 # because we count three pieces per mill (unless they intersect, but that's why we rounded up - it's not perfect, I know)
-    value += 1 * mills
+    v += 1 * mills
     
-    return value
+    return v

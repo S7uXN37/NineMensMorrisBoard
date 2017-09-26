@@ -13,17 +13,21 @@ import RPi.GPIO as GPIO
 #CLK = 11
 #D_OUT = 9
 #D_IN = 10
-#CS = 18
+#CS = 24
 #mcp = Adafruit_MCP3008.MCP3008(clk=CLK, cs=CS, miso=D_OUT, mosi=D_IN)
 
 # Hardware SPI configuration:
 SPI_PORT   = 0
-SPI_DEVICE = 0
-CS = 24
+SPI_DEVICE = 1
+CS = 3
 mcp = Adafruit_MCP3008.MCP3008(spi=SPI.SpiDev(SPI_PORT, SPI_DEVICE))
-
 GPIO.setmode(GPIO.BOARD)
+
+#GPIO.setmode(GPIO.BOARD)
 GPIO.setup(CS, GPIO.OUT, initial=GPIO.HIGH)
+#GPIO.setup(D_IN, GPIO.OUT, initial=GPIO.LOW)
+#GPIO.setup(D_OUT, GPIO.IN)
+#GPIO.setup(CLK, GPIO.OUT, initial=GPIO.LOW)
 
 print('Reading MCP3008 values, press Ctrl-C to quit...')
 # Print nice channel column headers.
@@ -41,7 +45,5 @@ try:
             GPIO.output(CS, GPIO.HIGH)
         # Print the ADC values.
         print('| {0:>4} | {1:>4} | {2:>4} | {3:>4} | {4:>4} | {5:>4} | {6:>4} | {7:>4} |'.format(*values))
-        # Pause for half a second.
-        time.sleep(0.5)
 finally:
     GPIO.cleanup()

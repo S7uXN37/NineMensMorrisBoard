@@ -1,56 +1,49 @@
 import RPi.GPIO as GPIO
 import time
+usleep = lambda x: time.sleep(x/1000.0/1000.0)
 
-# GLOBALS
-# PIN_A, PIN_B, PIN_C, PIN_D
-pins = [[29,33,31,35],
-	[32,38,36,40]]
-seq = [[0,0,1,1],
-	[1,0,0,1],
-	[1,1,0,0],
-	[0,1,1,0]]
+dirPin = 33
+stepPin = 35
+sleepPin = 36
+delay = 1800.0
 
-def setStep(step):
-	print(step)
-	for p in pins:
-		for i in range(0,4):
-			GPIO.output(p[i], step[i])
-
-
-def forward(delay, steps):  
+def move(steps, dir):
+	GPIO.output(dirPin, GPIO.HIGH if dir>0 else GPIO.LOW)
+	GPIO.output(sleepPin, GPIO.HIGH)
 	for i in range(0, steps):
-		for j in range(0, len(seq)):
-			setStep(seq[j])
-			time.sleep(delay)
-	setStep([0,0,0,0])
-
-def backwards(delay, steps):
-	for i in range(0, steps):
-		for j in range(0, len(seq)):
-			setStep(seq[len(seq)-j-1])
-			time.sleep(delay)
-	setStep([0,0,0,0])
-
-# ----- PROGRAM ------
+		GPIO.output(stepPin, GPIO.HIGH)
+		usleep(1)
+		GPIO.output(stepPin, GPIO.LOW)
+		t = 400.0
+		d_start = 4000.0
+		f_i = (d_start-delay)/(t*t) * (i-t)*(i-t) + delay
+		usleep(f_i if i < t else delay)
+	GPIO.output(sleepPin, GPIO.LOW)
 
 GPIO.setmode(GPIO.BOARD)
 
 # Initialize to LOW
-for pin in pins:
+for pin in [dirPin, stepPin, sleepPin]:
 	GPIO.setup(pin, GPIO.OUT, initial=GPIO.LOW)
 
 # UI
 try:
-	while True:
-		delay = raw_input("Delay between steps (milliseconds)? ")
-		steps = raw_input("How many steps forward? ")
-		forward(float(delay) / 1000.0, int(steps))
-		steps = raw_input("How many steps backwards? ")
-		backwards(float(delay) / 1000.0, int(steps))
+	if int(raw_input("Loop or Manual (1/0)?")) > 0:
+		while True:
+			move(2200, 1)
+			time.sleep(0.5)
+			move(2200,0)
+			time.sleep(0.5)
+	else:
+		while True:
+			steps = raw_input("How many steps forward? ")
+			move(int(steps), 1)
+			steps = raw_input("How many steps backwards? ")
+			move(int(steps), 0)
 except KeyboardInterrupt:
 	print("\nClosing...")
-finally:
-	for pin in pins:
-		GPIO.output(pin, GPIO.LOW)
-	GPIO.cleanup()
-	print("Cleaned up")
+
+GPIO.output(sleepPin, GPIO.LOW)
+
+GPIO.cleanup()
+print("Cleaned up")

@@ -12,11 +12,12 @@ import RPi.GPIO as GPIO
 # Hardware SPI configuration:
 SPI_PORT   = 0
 SPI_DEVICE = 0
-CS = 38
+CS = [18,26,22]
 mcp = Adafruit_MCP3008.MCP3008(spi=SPI.SpiDev(SPI_PORT, SPI_DEVICE))
 
 GPIO.setmode(GPIO.BOARD)
-GPIO.setup(CS, GPIO.OUT, initial=GPIO.HIGH)
+for _cs in CS:
+    GPIO.setup(_cs, GPIO.OUT, initial=GPIO.HIGH)
 
 def read_mcp(cs):
     values = [0]*8
@@ -35,34 +36,40 @@ print('-' * 57)
 # Main program loop.
 try:
     # Executing calibration for 10s
+    minVal = 1024
+    maxVal = 0
     try:
         print("Calibrating... You can interrupt with Ctrl+C")
-        for i in range(0, 20):
-            # Read all the ADC channel values in a list.
-            values = read_mcp(CS)
-            # Print the ADC values.
-            print('| {0:>4} | {1:>4} | {2:>4} | {3:>4} | {4:>4} | {5:>4} | {6:>4} | {7:>4} |'.format(*values))
-            # Pause for half a second.
-            time.sleep(0.5)
+        while True:
+            for j in range(3):
+                # Read all the ADC channel values in a list.
+                values = read_mcp(CS[j])
+                for x in values:
+                    maxVal = max(maxVal, x)
+                    minVal = min(minVal, x)
+                # Print the ADC values.
+                print(str(j) + ': | {0:>4} | {1:>4} | {2:>4} | {3:>4} | {4:>4} | {5:>4} | {6:>4} | {7:>4} |'.format(*values))
     except KeyboardInterrupt:
         print("Interrupted.")    
 
     # Ask for lower and upper bounds
-    lower_bound = int(raw_input("Lower bound: "))
-    upper_bound = int(raw_input("Upper bound: "))
+    lower_bound = int(raw_input("Lower bound (min="+str(minVal)+"): "))
+    upper_bound = int(raw_input("Upper bound (max="+str(maxVal)+"): "))
     
     while True:
-        # Read all the ADC channel values in a list.
-        values = read_mcp(CS)
-        for i in range(8):
-            if values[i] < lower_bound:
-                values[i] = -1
-            elif values[i] > upper_bound:
-                values[i] = 1
-            else:
-                values[i] = 0
-        # Print the ADC values.
-        print('| {0:>4} | {1:>4} | {2:>4} | {3:>4} | {4:>4} | {5:>4} | {6:>4} | {7:>4} |'.format(*values))
+        for j in range(3):
+            # Read all the ADC channel values in a list.
+            values = read_mcp(CS[j])
+            for i in range(8):
+                if values[i] < lower_bound:
+                    values[i] = -1
+                elif values[i] > upper_bound:
+                    values[i] = 1
+                else:
+                    values[i] = 0
+            # Print the ADC values.
+            print(str(j) + ': | {0:>4} | {1:>4} | {2:>4} | {3:>4} | {4:>4} | {5:>4} | {6:>4} | {7:>4} |'.format(*values))
+        print('  ')
         # Pause for half a second.
         time.sleep(0.5)
 

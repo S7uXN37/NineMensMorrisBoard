@@ -34,7 +34,7 @@ while True:
 			if data == "ping":
 				client_sock.sendall("pong")
 				print "received ping, responded w/ pong"
-				os.system("python ../gpio/demo.py")
+				os.system("python ../gpio-tests/demo.py")
 			else:
 				print "received [%s]" % data
 	

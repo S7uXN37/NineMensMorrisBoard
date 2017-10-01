@@ -6,7 +6,7 @@ import ai
 import time
 
 COLOR_AI = 1
-COORDS = [] #TODO
+COORDS = [(0,0), (3,0), (6,0),    (1,1), (1,3), (1,5),    (2,2), (2,3), (2,4),    (3,0), (3,1), (3,2),    (3,4), (3,5), (3,6),    (4,2), (4,3), (4,4),    (5,1), (5,3), (5,5),    (6,0), (6,3), (6,6)]
 BASE_COORDS = [] #TODO
 
 old_board = [0] * 24
@@ -14,15 +14,15 @@ pieces_player = 9
 pieces_ai = 9
 
 
-def resolve(i, board, base_color):
-    if i == -1:
+def resolve(i, context_board, base_color):
+    if i == -1: # -1 corresponds to a position in the base
         if base_color == COLOR_AI:
             base_ind = pieces_ai - 1
         else:
             base_ind = pieces_player - 1
         return BASE_COORDS[base_color][base_ind], base_color
     else:
-        return COORDS[i], board[i]
+        return COORDS[i], context_board[i]
 
 while True:
     print('reading...')
@@ -33,7 +33,7 @@ while True:
         if pieces_player > 0:  # ASSUME player uses all pieces from his storage before playing normally
             pieces_player -= 1
 
-        moves = ai.calcMove(board, COLOR_AI, pieces_ai, pieces_player)
+        _, moves = ai.calcMove(board, COLOR_AI, pieces_ai, pieces_player)
         for move in moves:
             start = move[0]
             dest = move[1]

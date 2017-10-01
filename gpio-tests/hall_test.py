@@ -20,13 +20,13 @@ for _cs in CS:
     GPIO.setup(_cs, GPIO.OUT, initial=GPIO.HIGH)
 
 def read_mcp(cs):
-    values = [0]*8
-    for i in range(8):
+    mcp_values = [0]*8
+    for k in range(8):
         # The read_adc function will get the value of the specified channel (0-7).
         GPIO.output(cs, GPIO.LOW)
-        values[i] = mcp.read_adc(i)
+        mcp_values[k] = mcp.read_adc(k)
         GPIO.output(cs, GPIO.HIGH)
-    return values
+    return mcp_values
 
 
 print('Reading MCP3008 values, press Ctrl-C to quit...')

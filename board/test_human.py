@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-import morris
+import mills_old
 import numpy as np
 import pygame
-game = morris.GameState()
+game = mills_old.GameState()
 done = False
 try:
     skip_player = True
@@ -13,11 +13,11 @@ try:
             if game.player_num_pieces > 0:
                 print('you still have %d pieces to set down freely' % game.player_num_pieces)
             print('select origin (will only matter, if applicable)')
-            start = morris.blockGetClickIndex()
+            start = mills_old.blockGetClickIndex()
             print('start = %d; select destination' % start)
-            dest = morris.blockGetClickIndex()
+            dest = mills_old.blockGetClickIndex()
             print('dest = %d; select piece to take (will only matter, if applicable)' % dest)
-            take = morris.blockGetClickIndex()
+            take = mills_old.blockGetClickIndex()
             print('take = %d' % take)
             
             x = np.ones(24)

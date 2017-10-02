@@ -65,7 +65,7 @@ def calcMove(board, color, pieces_self, pieces_opponent):
 
 def step(board, color, depth, pieces_self, pieces_opponent): # returns board (state of board after best move), score (value of board after best move), reward for that move, terminal if that move ends the game
     if depth <= 0:
-        return board, value(board, color=color) - value(board, color=-color), 0, False # reward and terminal won't be used anyway
+        return board, value(board, color=color) - value(board, color=-color), 0, False, [] # reward, terminal and moves won't be used anyway
     else:
         worstHisScore = float("inf")
         bestBoard = board
@@ -73,7 +73,7 @@ def step(board, color, depth, pieces_self, pieces_opponent): # returns board (st
         terminal = True
         movesDone = []
         for m in moves(board, color, pieces_self):
-            board_after = m.new_baord
+            board_after = np.array(m.new_board)
             requiredMoves = m.moves
             _, hisScore, _, _, _ = step(board_after, -color, depth-1, pieces_opponent, pieces_self-1)
             # evaluate position for opponent, minimize his advantage
@@ -117,17 +117,18 @@ def moves(board, color, pieces_self):
             if val == 0:
                 new_board = [x for x in board]
                 new_board[i] = color
+                def_move = (-1, i)  # move piece from base to i
 
                 if isInMill(new_board, i):  # if mill closed, instead list all possibilities for taking pieces
                     mill_boards, mill_moves = moves_on_mill_closed(new_board, color)
                     for k in range(len(mill_boards)):
                         move = change()
-                        move.moves = [(-1, i), (mill_moves[k][0], mill_moves[k][1])]
+                        move.moves = [def_move, (mill_moves[k][0], mill_moves[k][1])]
                         move.new_board = mill_boards[k]
                         boards = np.append(boards, move)
                 else:
                     move = change()
-                    move.moves = [(-1, i)]  # move piece from base to i
+                    move.moves = [def_move]  # move piece from base to i
                     move.new_board = new_board
                     boards = np.append(boards, move)
     elif len(board[board == color]) > 3: # can't jump
@@ -141,17 +142,18 @@ def moves(board, color, pieces_self):
                         new_board = [x for x in board]
                         new_board[i] = 0
                         new_board[f(i)] = color
+                        def_move = (i, f(i))  # move piece from i to f(i)
 
-                        if isInMill(new_board, i):  # if mill closed, instead list all possibilities for taking pieces
+                        if isInMill(new_board, f(i)):  # if mill closed, instead list all possibilities for taking pieces
                             mill_boards, mill_moves = moves_on_mill_closed(new_board, color)
                             for k in range(len(mill_boards)):
                                 move = change()
-                                move.moves = [(-1, i), (mill_moves[k][0], mill_moves[k][1])]
+                                move.moves = [def_move, (mill_moves[k][0], mill_moves[k][1])]
                                 move.new_board = mill_boards[k]
                                 boards = np.append(boards, move)
                         else:
                             move = change()
-                            move.moves = [(i, f(i))]  # move piece from base to i
+                            move.moves = [def_move]  # move piece from base to i
                             move.new_board = new_board
                             boards = np.append(boards, move)
     else: # can jump
@@ -162,22 +164,22 @@ def moves(board, color, pieces_self):
                         new_board = [x for x in board]
                         new_board[i] = 0
                         new_board[j] = color
+                        def_move = (i, j)  # move piece from i to j
 
-                        if isInMill(new_board, i):  # if mill closed, instead list all possibilities for taking pieces
+                        if isInMill(new_board, j):  # if mill closed, instead list all possibilities for taking pieces
                             mill_boards, mill_moves = moves_on_mill_closed(new_board, color)
                             for k in range(len(mill_boards)):
                                 move = change()
-                                move.moves = [(-1, i), (mill_moves[k][0], mill_moves[k][1])]
+                                move.moves = [def_move, (mill_moves[k][0], mill_moves[k][1])]
                                 move.new_board = mill_boards[k]
                                 boards = np.append(boards, move)
                         else:
                             move = change()
-                            move.moves = [(i, j)]  # move piece from base to i
+                            move.moves = [def_move]
                             move.new_board = new_board
                             boards = np.append(boards, move)
-    
-    num_moves = int(len(boards)/24)
-    # print('calculated %d possible moves:' % num_moves)
+
+    # print('calculated %d possible moves:' % len(boards))
     # print(boards)
     return boards
 

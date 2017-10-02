@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-import morris
+import mills_old
 import numpy as np
 import pygame
 
-game = morris.GameState()
+game = mills_old.GameState()
 try:
     for i in range(10):
         with open('log.csv', 'a') as f: # add breaks into log file to differentiate runs

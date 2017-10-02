@@ -3,6 +3,7 @@ import time
 usleep = lambda x: time.sleep(x/1000.0/1000.0)
 
 coordToSteps = 2000.0 / 6.0
+RESET_POS = [-0.22, -0.6] # 6.6cm/grid -4cm/6.6=-0.6, -1.5cm/6.6=-0.22
 
 # Mot1 on board, Mot2 below
 dirPin = [29,33]
@@ -46,23 +47,26 @@ GPIO.setup(triggerPin[1], GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.add_event_detect(triggerPin[0], GPIO.RISING, callback=trigger0)
 GPIO.add_event_detect(triggerPin[1], GPIO.RISING, callback=trigger1)
 
-posx = 0  # TODO do this by resetting
+posx = 0
 posy = 0
 
 def goTo(tx, ty):
     global posx, posy
     x = int((tx - posx) * coordToSteps)
     y = int((ty - posy) * coordToSteps)
+    print("Moving from " + str((posx,posy)) + " to " + str((tx,ty)))
     move([x,y])
-    posx += x
-    posy += y
+    posx = tx  # Must be in simple coordinate system!
+    posy = ty
 
 def reset():
+    global posx, posy
+    posx = RESET_POS[0]
+    posy = RESET_POS[1]
     for i in range(2):
         triggerSet[i] = (GPIO.input(triggerPin[i]) == 1)
     while not (triggerSet[0] and triggerSet[1]):
         xy = [0 if triggerSet[0] else -1, 0 if triggerSet[1] else -1]
-        print(xy)
         move(xy)
 
 def shutdown():

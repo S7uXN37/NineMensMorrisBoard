@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 import RPi.GPIO as GPIO
 
-pinA = 13
-pinB = 15
+pinA = 11
+pinB = 13
 
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup([pinA, pinB], GPIO.OUT, initial=GPIO.LOW)
@@ -18,3 +18,6 @@ def turnOn(color):
 def turnOff():
     GPIO.output(pinA, GPIO.LOW)
     GPIO.output(pinB, GPIO.LOW)
+
+def shutdown():
+    turnOff()

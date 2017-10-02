@@ -1,8 +1,8 @@
 import RPi.GPIO as GPIO
 import time
 
-pinA = 13
-pinB = 15
+pinA = 11
+pinB = 13
 
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup([pinA, pinB], GPIO.OUT, initial=GPIO.LOW)
@@ -22,7 +22,7 @@ try:
     i = 0
     while True:
         #dir = int(raw_input("Direction: "))
-        dir = 1#i%3 -1
+        dir = i%3 -1
         set(dir)
         print(dir)
         time.sleep(1)

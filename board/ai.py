@@ -47,11 +47,11 @@ def safeGet(board, i):
 
 
 def calcMove(board, color, pieces_self, pieces_opponent):
-    startTime = time.perf_counter()
+    #startTime = time.perf_counter()
     depth = 3
     
-    bestBoard, _, reward, terminal, movesDone = step(board, color, depth, pieces_self, pieces_opponent)
-    timeTaken = time.perf_counter() - startTime
+    bestBoard, _, reward, terminal, movesDone = step(np.array(board), color, depth, pieces_self, pieces_opponent)
+    #timeTaken = time.perf_counter() - startTime
     
     #print('Board analyzed, depth: %d, time: %f seconds' % (depth, timeTaken)) # DEBUG
     
@@ -109,7 +109,7 @@ class change:
 
 # noinspection PyTypeChecker
 def moves(board, color, pieces_self):
-    boards = np.array([], dtype=change)
+    boards = np.array([], dtype=object)
 
     if pieces_self > 0: # can set down anywhere
         for i, val in enumerate(board):  # for each field, if unoccupied, set down piece and add new_board

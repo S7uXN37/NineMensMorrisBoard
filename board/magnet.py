@@ -1,21 +1,20 @@
 #!/usr/bin/env python
 import RPi.GPIO as GPIO
 
-PIN_A = 20
-PIN_B = 20
+pinA = 13
+pinB = 15
 
-# Initialize to LOW
-GPIO.setup(PIN_A, GPIO.OUT, initial=GPIO.LOW)
-GPIO.setup(PIN_B, GPIO.OUT, initial=GPIO.LOW)
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup([pinA, pinB], GPIO.OUT, initial=GPIO.LOW)
 
 def turnOn(color):
-    if color<0:
-        GPIO.output(PIN_A, GPIO.HIGH)
-        GPIO.output(PIN_B, GPIO.LOW)
+    if color<0:  # TODO check
+        GPIO.output(pinA, GPIO.HIGH)
+        GPIO.output(pinB, GPIO.LOW)
     else:
-        GPIO.output(PIN_A, GPIO.LOW)
-        GPIO.output(PIN_B, GPIO.HIGH)
+        GPIO.output(pinA, GPIO.LOW)
+        GPIO.output(pinB, GPIO.HIGH)
 
 def turnOff():
-    GPIO.output(PIN_A, GPIO.LOW)
-    GPIO.output(PIN_B, GPIO.LOW)
+    GPIO.output(pinA, GPIO.LOW)
+    GPIO.output(pinB, GPIO.LOW)

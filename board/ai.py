@@ -47,8 +47,6 @@ def safeGet(board, i):
 
 
 def calcMove(board, color, pieces_self, pieces_opponent):
-    global last_times
-    
     startTime = time.perf_counter()
     depth = 3
     
@@ -109,6 +107,7 @@ class change:
     moves = [(-1,-1)]
     new_board = []
 
+# noinspection PyTypeChecker
 def moves(board, color, pieces_self):
     boards = np.array([], dtype=change)
 

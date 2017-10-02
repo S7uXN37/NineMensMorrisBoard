@@ -94,8 +94,15 @@ class GameState:
         self.player_num_pieces = 9
 
     def __init__(self):
-        self.reset()
-        if GUI:
+        self.board = np.zeros(24)
+        self.opponent_num_pieces = 9
+        self.player_num_pieces = 9
+        if GUI:  # Init pygame
+            pygame.init()
+            self.screen = pygame.display.set_mode((700, 700))
+            pygame.display.set_caption("Nine Men's Morris")
+            self.screen.fill(BACKGROUND)
+            self.clock = pygame.time.Clock()
             self.init_gui()
 
     def init_gui(self):
@@ -105,13 +112,6 @@ class GameState:
 
     def update_gui(self):
         done = False
-        # Init pygame
-        pygame.init()
-        self.screen = pygame.display.set_mode((700, 700))
-        pygame.display.set_caption("Nine Men's Morris")
-        self.screen.fill(BACKGROUND)
-        self.clock = pygame.time.Clock()
-
         while not done:
             global clickX, clickY, clickCondition
             try:
@@ -155,7 +155,6 @@ class GameState:
     def draw_piece(self, index, value):
         pos = getCoords(index)
         if value != 0:
-            color = None
             if value > 0:
                 color = PLAYER1
             else:
@@ -175,7 +174,6 @@ class GameState:
         terminal = False
 
         start = -1
-        dest = -1
 
         if not skip_player:
             # -------------------- FIGURE OUT MOVE --------------------
@@ -212,7 +210,7 @@ class GameState:
                     fs = [indexAbove, indexBelow, indexLeft, indexRight]
                     # Map to hold scores
                     map_type = [('start', 'i4'),('dest', 'i4'), ('score', 'f4')]
-                    map = np.array([], dtype=map_type)
+                    _map = np.array([], dtype=map_type)
                     # Loop to check all possible moves
                     for s in range(0,24):
                         if self.board[s] == color:
@@ -220,12 +218,12 @@ class GameState:
                                 d = f(s)
                                 if d != -1 and self.board[d] == 0:
                                     score = input_vect[d] - input_vect[s]
-                                    map = np.append(map, np.array((s,d,score), dtype=map_type))
+                                    _map = np.append(_map, np.array((s,d,score), dtype=map_type))
                     # Find best move
                     try:
-                        best = np.argmax(map['score']) # throws ValueError if empty
-                        start = map['start'][best]
-                        dest = map['dest'][best]
+                        best = np.argmax(_map['score']) # throws ValueError if empty
+                        start = _map['start'][best]
+                        dest = _map['dest'][best]
                     except ValueError:
                         dest = -1
                         start = -1

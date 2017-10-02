@@ -24,6 +24,6 @@ for p in pins:
 # TODO hookPressure
 
 def reset():
-    for p in pins:
-        for pin in p:
-            GPIO.output(pin, GPIO.LOW)
+    for _p in pins:
+        for _pin in _p:
+            GPIO.output(_pin, GPIO.LOW)

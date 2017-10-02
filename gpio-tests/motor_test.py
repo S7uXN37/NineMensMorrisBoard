@@ -7,10 +7,10 @@ stepPin = 35
 sleepPin = 36
 delay = 1800.0
 
-def move(steps, dir):
-	GPIO.output(dirPin, GPIO.HIGH if dir>0 else GPIO.LOW)
+def move(num_steps, direction):
+	GPIO.output(dirPin, GPIO.HIGH if direction > 0 else GPIO.LOW)
 	GPIO.output(sleepPin, GPIO.HIGH)
-	for i in range(0, steps):
+	for i in range(0, num_steps):
 		GPIO.output(stepPin, GPIO.HIGH)
 		usleep(1)
 		GPIO.output(stepPin, GPIO.LOW)

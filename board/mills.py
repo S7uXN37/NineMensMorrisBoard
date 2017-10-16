@@ -4,6 +4,7 @@ import input
 import magnet
 import ai
 import time
+import math
 import RPi.GPIO as GPIO
 
 COLOR_AI = 1
@@ -25,6 +26,58 @@ def resolve(i, context_board, base_color):
         return BASE_COORDS[1 if base_color == COLOR_AI else 0][base_ind], base_color
     else:
         return COORDS[i], context_board[i]
+
+
+def distance_to_line(p0, s, t):
+    x_diff = t[0] - s[0]
+    y_diff = t[1] - s[1]
+    num = abs(y_diff * p0[0] - x_diff * p0[1] + t[0] * s[1] - t[1] * s[0])
+    den = math.sqrt(y_diff ** 2 + x_diff ** 2)
+    return num / den
+
+def isUnblocked(_board, s, t):
+    for stone in _board:
+        pos = resolve(stone, _board, COLOR_AI)
+        return distance_to_line(pos, s, t) > 3
+
+def getSafePath(start, target):  # TODO
+    return [start, ..., target]
+
+def getShortSafePath(_board, start, target):
+    best_states = []
+    min_dist = float('inf')
+
+    safe_path = getSafePath(start, target)  # list of tuples, first = start, last = target
+    l = len(safe_path)-2
+    for i in range(2 ** l):  # for every possible combination of active vertices
+        m = i
+        isActive = [True]  # holds state of every vertex, first always active
+        for j in range(l-1, -1, -1):  # for every middle vertex
+            k = int(m / 2 ** j)
+            m -= k * 2 ** j
+            isActive.append(k==1)
+        isActive.append(True)  # last always active
+
+        valid = True
+        tot_dist = 0
+        for j in range(l+1):  # for every vertex
+            for k in range(j+1, l):
+                if isActive[k]:
+                    next_active = k
+                    break
+            valid = valid and isUnblocked(_board, safe_path[j], safe_path[next_active])
+            tot_dist += math.sqrt((safe_path[j][0] - safe_path[next_active][0])**2
+                                  + (safe_path[j][1] - safe_path[next_active][1])**2)
+
+        if valid and tot_dist < min_dist:
+            min_dist = tot_dist
+            best_states = isActive
+
+    avoid_path = []
+    for i, val in enumerate(best_states):
+        if val:
+            avoid_path.append(safe_path[i])
+    return avoid_path
 
 def shutdown():
     input.shutdown()
@@ -58,7 +111,9 @@ try:
                 # move piece from start to dest
                 motors.goTo(c1[0], c1[1])
                 magnet.turnOn(color)
-                motors.goTo(c2[0], c2[1])
+                path = getShortSafePath(board, c1, c2)
+                for pos in path:
+                    motors.goTo(pos[0], pos[1])
                 magnet.turnOff()
                 time.sleep(0.5)
             motors.goTo(motors.RESET_POS[0], motors.RESET_POS[1])

@@ -38,7 +38,7 @@ def distance_to_line(p0, s, t):
 def isUnblocked(_board, s, t):
     for stone in _board:
         pos = resolve(stone, _board, COLOR_AI)
-        return distance_to_line(pos, s, t) > 3
+        return distance_to_line(pos, s, t) > 0.4
 
 def getSafePath(start, target):  # TODO
     return [start, ..., target]

@@ -5,6 +5,7 @@ import magnet
 import ai
 import time
 import math
+import safe_path_generator as SPG
 import RPi.GPIO as GPIO
 
 COLOR_AI = 1
@@ -40,14 +41,13 @@ def isUnblocked(_board, s, t):
         pos = resolve(stone, _board, COLOR_AI)
         return distance_to_line(pos, s, t) > 0.4
 
-def getSafePath(start, target):  # TODO
-    return [start, ..., target]
-
 def getShortSafePath(_board, start, target):
     best_states = []
     min_dist = float('inf')
 
-    safe_path = getSafePath(start, target)  # list of tuples, first = start, last = target
+    safe_path = [COORDS[start]]
+    safe_path.extend(SPG.generate(start, target))  # list of tuples, first = start, last = target
+    safe_path.append(COORDS[target])
     l = len(safe_path)-2
     for i in range(2 ** l):  # for every possible combination of active vertices
         m = i
@@ -111,7 +111,7 @@ try:
                 # move piece from start to dest
                 motors.goTo(c1[0], c1[1])
                 magnet.turnOn(color)
-                path = getShortSafePath(board, c1, c2)
+                path = getShortSafePath(board, start, dest)
                 for pos in path:
                     motors.goTo(pos[0], pos[1])
                 magnet.turnOff()

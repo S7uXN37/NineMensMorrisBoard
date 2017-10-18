@@ -37,9 +37,13 @@ def distance_to_line(p0, s, t):
     return num / den
 
 def isUnblocked(_board, s, t):
-    for stone in _board:
-        pos = resolve(stone, _board, COLOR_AI)
-        return distance_to_line(pos, s, t) > 0.4
+    for i in range(len(_board)):
+        if _board[i] == 0:
+            continue
+        _pos, _ = resolve(i, _board, COLOR_AI)
+        if distance_to_line(_pos, s, t) < 0.4:
+            return False
+    return True
 
 def getShortSafePath(_board, start, target):
     best_states = []
@@ -61,6 +65,7 @@ def getShortSafePath(_board, start, target):
         valid = True
         tot_dist = 0
         for j in range(l+1):  # for every vertex
+            next_active = -1
             for k in range(j+1, l):
                 if isActive[k]:
                     next_active = k

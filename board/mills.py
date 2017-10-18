@@ -72,13 +72,17 @@ def getShortSafePath(_board, start, target):
 
         valid = True
         tot_dist = 0
-        for j in range(l+1):  # for every vertex
+        for j in range(l+1):  # for every active vertex
+            if not isActive[j]:
+                continue
             next_active = -1
             for k in range(j+1, len(safe_path)):
                 if isActive[k]:
                     next_active = k
                     break
-            valid = valid and isUnblocked(_board, safe_path[j], safe_path[next_active])
+            valid = isUnblocked(_board, safe_path[j], safe_path[next_active])
+            if not valid:
+                break
             tot_dist += math.sqrt((safe_path[j][0] - safe_path[next_active][0])**2
                                   + (safe_path[j][1] - safe_path[next_active][1])**2)
 

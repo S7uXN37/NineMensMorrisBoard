@@ -28,26 +28,34 @@ def resolve(i, context_board, base_color):
     else:
         return COORDS[i], context_board[i]
 
-
-def distance_to_line(p0, s, t):
-    x_diff = t[0] - s[0]
-    y_diff = t[1] - s[1]
-    num = abs(y_diff * p0[0] - x_diff * p0[1] + t[0] * s[1] - t[1] * s[0])
-    den = math.sqrt(y_diff ** 2 + x_diff ** 2)
-    return num / den
+def dist(a, b):
+    return math.sqrt((a[0]-b[0])**2 + (a[1]-b[1])**2)
+def distance_to_line_seg(p0, s, t):
+    # Line segment st as part of line: s + x*(t-s)
+    # Find l2 as (t-s)^2
+    l2 = (s[0] - t[0])**2 + (s[1] - t[1])**2
+    if l2 == 0:  # s = t
+        return dist(p0, s)
+    # Find x as dot(p - s, t - s) / l2, clamp to [0,1] -> inside st
+    x = ((p0[0] - s[0]) * (t[0] - s[0]) + (p0[1] - s[1]) * (t[1] - s[1])) / l2
+    x = max(0, min(1, x))
+    # Calc proj. point -> s + x*(t-s)
+    _p = (s[0] + x * (t[0] - s[0]), s[1] + x * (t[1] - s[1]))
+    return dist(p0, _p)
 
 def isUnblocked(_board, s, t):
     for i in range(len(_board)):
         if _board[i] == 0:
             continue
         _pos, _ = resolve(i, _board, COLOR_AI)
-        if distance_to_line(_pos, s, t) < 0.4:
+        if distance_to_line_seg(_pos, s, t) < 0.4:
             return False
     return True
 
 def getShortSafePath(_board, start, target):
     best_states = []
     min_dist = float('inf')
+    _board[start] = 0  # no collision tith stone that should be moved
 
     safe_path = [COORDS[start]]
     safe_path.extend(SPG.generate(start, target))  # list of tuples, first = start, last = target
@@ -66,7 +74,7 @@ def getShortSafePath(_board, start, target):
         tot_dist = 0
         for j in range(l+1):  # for every vertex
             next_active = -1
-            for k in range(j+1, l):
+            for k in range(j+1, len(safe_path)):
                 if isActive[k]:
                     next_active = k
                     break

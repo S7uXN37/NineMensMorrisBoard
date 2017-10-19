@@ -1,6 +1,8 @@
 import math
 import safe_path_generator as SPG
-import simpleaudio as sa
+import pygame
+
+pygame.mixer.init()
 
 def dist(a, b):
     return math.sqrt((a[0]-b[0])**2 + (a[1]-b[1])**2)
@@ -54,10 +56,12 @@ def getShortSafePath(_board, start, target):
     best_states = []
     min_dist = float('inf')
     _board[start] = 0  # no collision with stone that should be moved
-
-    safe_path = [COORDS[start]]
+    
+    start_pos, _ = resolve(start, _board, COLOR_AI)
+    safe_path = [start_pos]
     safe_path.extend(SPG.generate(start, target))  # list of tuples, first = start, last = target
-    safe_path.append(COORDS[target])
+    target_pos, _ = resolve(target, _board, -COLOR_AI)
+    safe_path.append(target_pos)
     l = len(safe_path)-2
     for i in range(2 ** l):  # for every possible combination of active vertices
         m = i
@@ -94,14 +98,15 @@ def getShortSafePath(_board, start, target):
             avoid_path.append(safe_path[i])
     return avoid_path
 
-print(getShortSafePath([0 if i == 23 else 1 for i in range(24)], 0, 23))
+print(getShortSafePath([0 for i in range(24)], -1, 4))
 
 
 def play_sound(path):
-    wave_obj = sa.WaveObject.from_wave_file(path)
-    play_obj = wave_obj.play()
-    play_obj.wait_done()
+    pygame.mixer.music.load(path)
+    pygame.mixer.music.play()
+    while pygame.mixer.music.get_busy() == True:
+        continue
 
-play_sound('clap.wav')
-play_sound('ping.wav')
-play_sound('fanfare.wav')
+play_sound('../sounds/clap.wav')
+play_sound('../sounds/ping.wav')
+play_sound('../sounds/fanfare.wav')

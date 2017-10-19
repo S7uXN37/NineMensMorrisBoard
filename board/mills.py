@@ -6,6 +6,7 @@ import ai
 import time
 import math
 import safe_path_generator as SPG
+import simpleaudio as sa
 import RPi.GPIO as GPIO
 
 COLOR_AI = 1
@@ -55,7 +56,7 @@ def isUnblocked(_board, s, t):
 def getShortSafePath(_board, start, target):
     best_states = []
     min_dist = float('inf')
-    _board[start] = 0  # no collision tith stone that should be moved
+    _board[start] = 0  # no collision with stone that should be moved
 
     safe_path = [COORDS[start]]
     safe_path.extend(SPG.generate(start, target))  # list of tuples, first = start, last = target
@@ -67,7 +68,7 @@ def getShortSafePath(_board, start, target):
         for j in range(l-1, -1, -1):  # for every middle vertex
             k = int(m / 2 ** j)
             m -= k * 2 ** j
-            isActive.append(k==1)
+            isActive.append(k == 1)
         isActive.append(True)  # last always active
 
         valid = True
@@ -96,11 +97,29 @@ def getShortSafePath(_board, start, target):
             avoid_path.append(safe_path[i])
     return avoid_path
 
+def reset():
+    # Resets all pieces to the base, clears any records of previous boards
+    print('Resetting the board')
+
 def shutdown():
     input.shutdown()
     motors.shutdown()
     magnet.shutdown()
     GPIO.cleanup()
+
+def count(_board, _color):
+    num = 0
+    for val in _board:
+        if val == _color:
+            num += 1
+    return num
+
+# These methods play a sound, wait for it to finish and then wait 0.5s more
+def play_sound(path):
+    wave_obj = sa.WaveObject.from_wave_file(path)
+    play_obj = wave_obj.play()
+    play_obj.wait_done()
+    time.sleep(0.5)
 
 try:
     print('Resetting motors...')
@@ -108,12 +127,45 @@ try:
     while True:
         print('Checking board...')
         board = input.readBoard()
-        if not old_board == board:
-            print('read board: ' + str(board))
-            print('found changes, calculating move')
+        should_move = False
+        if old_board != board:
+            if pieces_player == pieces_ai == 0:  # Phase one as long as one player has stones to set down
+                # A move in phase one is over as soon as a stone is set down -> any change in board
+                should_move = True
+                print('found change in PHASE ONE')
+            else:
+                # A move in phase two or three is over when a stone has been moved -> same number of pieces
+                # If a mill has just been closed (new stone isInMill), after a COLOR_AI piece has been removed
+                # If one color now only has two pieces left, the game is over -> clean board
+                num_ai_old = count(old_board, COLOR_AI)
+                num_ai = count(board, COLOR_AI)
+                num_pl_old = count(old_board, -COLOR_AI)
+                num_pl = count(board, -COLOR_AI)
+                pl_move_dest = -1
+                for i, v in enumerate(board):
+                    if old_board[i] == 0 and v == -COLOR_AI:  # player piece added
+                        pl_move_dest = i
+                if num_ai < 3:  # AI just lost
+                    print('Suppose I\'ve lost :(')
+                    play_sound('clap.wav')
+                    reset()
+                    continue
+                if ai.isInMill(board, pl_move_dest):  # If a mill was closed, the move ends when one num_ai decreases by 1
+                    should_move = num_ai == num_ai_old-1
+                    if should_move:
+                        print('Found closed mill on field %i, AI piece removed' % pl_move_dest)
+                else:  # otherwise, both players must have the same number of pieces as before
+                    should_move = num_pl == num_pl_old and num_ai == num_ai_old
+                    if should_move:
+                        print('Found move to %i without any closed mills' % pl_move_dest)
+        if should_move:
+            play_sound('ping.wav')
+            print('calculating move... p_ai=%i p_pl=%i' % (pieces_ai, pieces_player))
 
-            if pieces_player > 0:  # ASSUME player uses all pieces from his storage before playing normally
+            if pieces_player > 0:  # ASSUME player uses all pieces from their storage before playing normally
                 pieces_player -= 1
+            if pieces_ai > 0:  # ASSUME AI uses all pieces from its storage before playing normally
+                pieces_ai -= 1
 
             _, moves = ai.calcMove(board, COLOR_AI, pieces_ai, pieces_player)
             for move in moves:
@@ -136,6 +188,10 @@ try:
             motors.goTo(motors.RESET_POS[0], motors.RESET_POS[1])
             motors.reset()
             old_board = input.readBoard()
+            if count(old_board, -COLOR_AI) < 3:  # AI just won
+                play_sound('fanfare.wav')
+                reset()
+                continue
         else:
             time.sleep(2)
 except KeyboardInterrupt:

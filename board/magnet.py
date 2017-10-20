@@ -8,7 +8,7 @@ GPIO.setmode(GPIO.BOARD)
 GPIO.setup([pinA, pinB], GPIO.OUT, initial=GPIO.LOW)
 
 def turnOn(color):
-    if color<0:  # TODO check
+    if color < 0:
         GPIO.output(pinA, GPIO.HIGH)
         GPIO.output(pinB, GPIO.LOW)
     else:

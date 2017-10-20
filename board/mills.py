@@ -13,25 +13,34 @@ pygame.mixer.init()
 
 COLOR_AI = 1
 COORDS = [(0,0), (3,0), (6,0),    (1,1), (1,3), (1,5),    (2,2), (2,3), (2,4),    (3,0), (3,1), (3,2),    (3,4), (3,5), (3,6),    (4,2), (4,3), (4,4),    (5,1), (5,3), (5,5),    (6,0), (6,3), (6,6)]
-BASE_COORDS = [[(6.22-(6.44/8*(8-x)),6.6) for x in range(9)],  #BASE_PLAYER
-               [(-0.22+(6.44/8*(8-x),-0.6) for x in range(9)]]  #BASE_AI
+order_arr = [[8, 2, 0, 4, 6, 5, 1, 3, 7].index(x) for x in range(9)]  # which base field is accessed when (the first at time 8, the second at time 2)
+COORDS.extend([(-0.22+(6.44/8*x), -0.6) for x in order_arr])  # BASE_AI from 24 - 32
+COORDS.extend([(6.22-(6.44/8*x), 6.6) for x in order_arr])  # BASE_PLAYER from 33 - 41
 
 old_board = [0] * 24
 pieces_player = 9
+pieces_taken = 0
 pieces_ai = 9
 
-
-def resolve(i, context_board, base_color):
-    if i == -1: # -1 corresponds to a position in the base
-        if base_color == COLOR_AI:
-            base_ind = pieces_ai
-        else:
-            base_ind = pieces_player
-        return BASE_COORDS[1 if base_color == COLOR_AI else 0][base_ind], base_color
+# Returns the updated board index referring to a specific position in the base instead of the base in general
+def resolve_base(_i, base_color):
+    if _i != -1:  # no effect on normal fields
+        return _i
+    if base_color == COLOR_AI:
+        return 24 + 9 - pieces_ai
     else:
-        return COORDS[i], context_board[i]
+        # list: where to put taken pieces first in player base (such that all pieces can be placed in the worst case)
+        return 33 + [2, 4, 6, 5, 3, 1, 0][pieces_taken]
+def resolve(_i, context_board, base_color):
+    global pieces_player, pieces_ai
+    if _i == -1:  # -1 corresponds to a position in the base
+        return COORDS[resolve_base(_i, base_color)], base_color
+    else:
+        return COORDS[_i], context_board[_i]
 
 def getShortSafePath(_board, start, target):
+    if dest == -1 or start == -1:
+        raise RuntimeError('Position in base must be resolved first')
     start_pos, _ = resolve(start, _board, COLOR_AI)
     target_pos, _ = resolve(target, _board, -COLOR_AI)
     safe_path = [start_pos]
@@ -42,10 +51,27 @@ def getShortSafePath(_board, start, target):
     return safe_path
 
 def reset():
+    global pieces_player, pieces_ai
     # Resets all pieces to the base, clears any records of previous boards
     time.sleep(2)
     print('Resetting the board')
-    # TODO
+    _board = input.readBoard()
+    for _i, val in _board:
+        if val != 0:
+            _pos, _ = resolve(_i, _board, COLOR_AI)
+            _dest, _ = resolve(-1, _board, val)
+            if val == COLOR_AI:
+                pieces_ai += 1
+            else:
+                pieces_player += 1
+            motors.goTo(_pos[0], _pos[1])
+            magnet.turnOn(val)
+            _path = getShortSafePath(board, start, _dest)
+            for p in _path:
+                motors.goTo(p[0], p[1])
+            magnet.turnOff()
+            time.sleep(0.5)
+
 
 def shutdown():
     input.shutdown()
@@ -61,9 +87,9 @@ def count(_board, _color):
     return num
 
 # These methods play a sound, wait for it to finish and then wait 0.5s more
-def play_sound(path):
-    print('playing sound: %s' % path)
-    pygame.mixer.music.load(path)
+def play_sound(_path):
+    print('playing sound: %s' % _path)
+    pygame.mixer.music.load(_path)
     pygame.mixer.music.play()
 
 try:
@@ -108,8 +134,6 @@ try:
 
             if pieces_player > 0:  # ASSUME player uses all pieces from their storage before playing normally
                 pieces_player -= 1
-            if pieces_ai > 0:  # ASSUME AI uses all pieces from its storage before playing normally
-                pieces_ai -= 1
 
             _, moves = ai.calcMove(board, COLOR_AI, pieces_ai, pieces_player)
             for move in moves:
@@ -124,13 +148,19 @@ try:
                 # move piece from start to dest
                 motors.goTo(c1[0], c1[1])
                 magnet.turnOn(color)
-                path = getShortSafePath(board, start, dest)
+                path = getShortSafePath(board, resolve_base(start, COLOR_AI), resolve_base(dest, -COLOR_AI))
                 for pos in path:
                     motors.goTo(pos[0], pos[1])
                 magnet.turnOff()
+                if dest == -1:  # after piece has been moved to the player's base, we can update pieces_taken
+                    pieces_taken += 1
                 time.sleep(0.5)
             motors.goTo(motors.RESET_POS[0], motors.RESET_POS[1])
             motors.reset()
+
+            if pieces_ai > 0:  # ASSUME AI uses all pieces from its storage before playing normally
+                pieces_ai -= 1
+
             old_board = input.readBoard()
             if count(old_board, -COLOR_AI) < 3 and pieces_player == 0:  # AI just won
                 play_sound('../sounds/fanfare.wav')

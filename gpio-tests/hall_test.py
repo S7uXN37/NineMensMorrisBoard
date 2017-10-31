@@ -1,8 +1,9 @@
-# Simple example of reading the MCP3008 analog input channels and printing
+# Based upon: Simple example of reading the MCP3008 analog input channels and printing
 # them all out.
 # Author: Tony DiCola
 # License: Public Domain
 import time
+import matplotlib.pyplot as plt
 
 # Import SPI library (for hardware SPI) and MCP3008 library.
 import Adafruit_GPIO.SPI as SPI
@@ -39,22 +40,28 @@ try:
     minVal = 1024
     maxVal = 0
     try:
+        data = []
         print("Calibrating... You can interrupt with Ctrl+C")
         while True:
             for j in range(3):
                 # Read all the ADC channel values in a list.
                 values = read_mcp(CS[j])
                 for x in values:
+                    data.append(x)
                     maxVal = max(maxVal, x)
                     minVal = min(minVal, x)
                 # Print the ADC values.
                 print(str(j) + ': | {0:>4} | {1:>4} | {2:>4} | {3:>4} | {4:>4} | {5:>4} | {6:>4} | {7:>4} |'.format(*values))
     except KeyboardInterrupt:
-        print("Interrupted.")    
-
+        print("Interrupted.")
+    
+    plt.hist(data, bins=500)
+    plt.title("Histogram of sensor data")
+    plt.show()
     # Ask for lower and upper bounds
     lower_bound = int(raw_input("Lower bound (min="+str(minVal)+"): "))
     upper_bound = int(raw_input("Upper bound (max="+str(maxVal)+"): "))
+    plt.close()
     
     while True:
         for j in range(3):

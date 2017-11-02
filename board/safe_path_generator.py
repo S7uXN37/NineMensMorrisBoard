@@ -59,7 +59,6 @@ def astar(start, goal):  # A* search algorithm
             while current in came_from:
                 data.append(current)
                 current = came_from[current]
-            data.append(0)
             data.reverse()
             return data, score
         close_set.add(current)  # add current node to close_set, as all neighbors will have been evaluated

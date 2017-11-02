@@ -41,8 +41,8 @@ def resolve(_i, context_board, base_color):
 def getShortSafePath(_board, start, target):
     if dest == -1 or start == -1:
         raise RuntimeError('Position in base must be resolved first')
-    start_pos, _ = resolve(start, _board, COLOR_AI)
-    target_pos, _ = resolve(target, _board, -COLOR_AI)
+    start_pos = COORDS[start]
+    target_pos = COORDS[target]
     safe_path = [start_pos]
     safe_path.extend(SPG.generate(start, target))  # list of tuples, first = start, last = target
     safe_path.append(target_pos)

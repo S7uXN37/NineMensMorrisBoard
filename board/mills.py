@@ -8,6 +8,7 @@ import math
 import safe_path_generator as SPG
 import pygame
 import RPi.GPIO as GPIO
+import os
 
 pygame.mixer.init()
 
@@ -16,6 +17,8 @@ COORDS = [(0,0), (3,0), (6,0),    (1,1), (1,3), (1,5),    (2,2), (2,3), (2,4),  
 order_arr = [[8, 2, 0, 4, 6, 5, 1, 3, 7].index(x) for x in range(9)]  # which base field is accessed when (the first at time 8, the second at time 2)
 COORDS.extend([(-0.22+(6.44/8*x), -0.6) for x in order_arr])  # BASE_AI from 24 - 32
 COORDS.extend([(6.22-(6.44/8*x), 6.6) for x in order_arr])  # BASE_PLAYER from 33 - 41
+
+shutdownPin = 13
 
 old_board = [0] * 24
 pieces_player = 9
@@ -78,6 +81,7 @@ def shutdown():
     motors.shutdown()
     magnet.shutdown()
     GPIO.cleanup()
+    os.system("sudo shutdown 0")
 
 def count(_board, _color):
     num = 0
@@ -93,6 +97,8 @@ def play_sound(_path):
     pygame.mixer.music.play()
 
 try:
+    GPIO.add_event_detect(shutdownPin, GPIO.RISING, callback=shutdown)
+
     print('Resetting motors...')
     motors.reset()
     while True:

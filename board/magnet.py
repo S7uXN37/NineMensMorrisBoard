@@ -1,23 +1,23 @@
 #!/usr/bin/env python
 import RPi.GPIO as GPIO
+import serial
 
-pinA = 11
-pinB = 13
-
-GPIO.setmode(GPIO.BOARD)
-GPIO.setup([pinA, pinB], GPIO.OUT, initial=GPIO.LOW)
+for i in range(10):
+    try:
+        port = '/dev/ttyACM%i' % i
+        s = serial.Serial(port, 9600)
+        print("Connected to Arduino on port: %s" % port)
+        break
+    except SerialException:
+        continue
 
 def turnOn(color):
-    if color < 0:
-        GPIO.output(pinA, GPIO.HIGH)
-        GPIO.output(pinB, GPIO.LOW)
-    else:
-        GPIO.output(pinA, GPIO.LOW)
-        GPIO.output(pinB, GPIO.HIGH)
+    s.write('%i' % color)
+    resp = s.readline()
+    print("Arduino: %s" % resp)
 
 def turnOff():
-    GPIO.output(pinA, GPIO.LOW)
-    GPIO.output(pinB, GPIO.LOW)
+    turnOn(0)
 
 def shutdown():
     turnOff()

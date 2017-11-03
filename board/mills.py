@@ -97,7 +97,8 @@ def play_sound(_path):
     pygame.mixer.music.play()
 
 try:
-    GPIO.add_event_detect(shutdownPin, GPIO.RISING, callback=shutdown)
+    #GPIO.setup(shutdownPin, GPIO.INPUT, pull_up_down=GPIO.PUD_DOWN)
+    #GPIO.add_event_detect(shutdownPin, GPIO.RISING, callback=shutdown)
 
     print('Resetting motors...')
     motors.reset()

@@ -44,7 +44,7 @@ for pin in [dirPin, stepPin, sleepPin]:
     GPIO.setup(pin, GPIO.OUT, initial=GPIO.LOW)
 GPIO.setup(triggerPin[0], GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(triggerPin[1], GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.add_event_detect(triggerPin[0], GPIO.RISING, callback=trigger0)
+GPIO.add_event_detect(triggerPin[0], GPIO.FALLING, callback=trigger0)
 GPIO.add_event_detect(triggerPin[1], GPIO.RISING, callback=trigger1)
 
 posx = 0
@@ -60,6 +60,7 @@ def goTo(tx, ty):
     posy = ty
 
 def reset():
+    return # TODO fix button and reimplement function
     global posx, posy
     posx = RESET_POS[0]
     posy = RESET_POS[1]

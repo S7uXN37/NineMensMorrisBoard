@@ -12,7 +12,7 @@ for i in range(10):
         continue
 
 def turnOn(color):
-    s.write('%i' % color)
+    s.write(bytes('%i' % color, 'UTF-8'))
     resp = s.readline()
     print("Arduino: %s" % resp)
 
@@ -21,3 +21,4 @@ def turnOff():
 
 def shutdown():
     turnOff()
+    s.close()

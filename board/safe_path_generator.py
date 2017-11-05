@@ -13,6 +13,8 @@ NODES = [(0.5, 0.5), (2, 0.5), (3, 0.5), (4, 0.5), (5.5, 0.5),  # nodes 0-4
          (0.5, 5.5), (2, 5.5), (3, 5.5), (4, 5.5), (5.5, 5.5),  # nodes 27-31
          (1.39, -0.6), (4.61, -0.6), (1.39, 6.6), (4.61, 6.6)  # nodes in base, 32 & 33 in AI, 34 & 35 in player
          ]  # node at INDEX has coordinates VALUE
+for i, val in enumerate(NODES):  # reverse due to wrong use of coordinate system
+    NODES[i] = val[::-1]
 CONNECTIONS = [[1, 10],  [0, 2, 6],    [1, 3],   [2, 4, 8],    [3, 13],   # nodes 0-4
                [6, 11],  [1, 5, 7],    [6, 8],   [3, 7, 9],    [8, 12],   # nodes 5-9
                [0, 11, 14, 32],    [5, 10, 15],  [9, 13, 16],  [4, 12, 17, 34],   # nodes 10-13

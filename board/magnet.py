@@ -8,10 +8,13 @@ for i in range(10):
         s = serial.Serial(port, 9600)
         print("Connected to Arduino on port: %s" % port)
         break
-    except SerialException:
-        continue
+    except serial.serialutil.SerialException:
+        print("Arduino not on port: %s" % port)
+    if i == 9:
+        raise RuntimeError("Could not find Arduino")
 
 def turnOn(color):
+    color = -color
     s.write(bytes('%i' % color, 'UTF-8'))
     resp = s.readline()
     print("Arduino: %s" % resp)

@@ -6,9 +6,9 @@ import ai
 import time
 import math
 import safe_path_generator as SPG
-import pygame
 import RPi.GPIO as GPIO
 import os
+import pygame
 
 pygame.mixer.init()
 
@@ -18,7 +18,8 @@ order_arr = [[8, 2, 0, 4, 6, 5, 1, 3, 7].index(x) for x in range(9)]  # which ba
 COORDS.extend([(-0.22+(6.44/8*x), -0.6) for x in order_arr])  # BASE_AI from 24 - 32
 COORDS.extend([(6.22-(6.44/8*x), 6.6) for x in order_arr])  # BASE_PLAYER from 33 - 41
 
-shutdownPin = 13
+shutdownPin = 11
+ledPin = 3
 
 old_board = [0] * 24
 pieces_player = 9
@@ -76,12 +77,14 @@ def reset():
             time.sleep(0.5)
 
 
-def shutdown():
+def shutdown(channel=0):
     input.shutdown()
     motors.shutdown()
     magnet.shutdown()
+    GPIO.output(ledPin, GPIO.LOW)
     GPIO.cleanup()
-    os.system("sudo shutdown 0")
+    quit()
+    #os.system("sudo shutdown 0")
 
 def count(_board, _color):
     num = 0
@@ -97,7 +100,9 @@ def play_sound(_path):
     pygame.mixer.music.play()
 
 try:
-    #GPIO.setup(shutdownPin, GPIO.INPUT, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(ledPin, GPIO.OUT)
+    GPIO.output(ledPin, GPIO.HIGH)
+    #GPIO.setup(shutdownPin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     #GPIO.add_event_detect(shutdownPin, GPIO.RISING, callback=shutdown)
 
     print('Resetting motors...')

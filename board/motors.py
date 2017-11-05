@@ -16,7 +16,7 @@ delay = 1800.0
 def trigger0(channel):
     triggerSet[0]=True
 def trigger1(channel):
-        triggerSet[1]=True
+    triggerSet[1]=True
 
 def move(steps):
     for j in range(2):

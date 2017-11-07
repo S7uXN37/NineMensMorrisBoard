@@ -1,5 +1,6 @@
 import RPi.GPIO as GPIO
 import time
+import threading
 usleep = lambda x: time.sleep(x/1000.0/1000.0)
 
 coordToSteps = 2000.0 / 6.0
@@ -9,12 +10,20 @@ RESET_POS = [-0.22, -0.6] # 6.6cm/grid -4cm/6.6=-0.6, -1.5cm/6.6=-0.22
 dirPin = [29,33]
 stepPin = [31,35]
 sleepPin = [32,36]
-triggerPin = [38,40]
+triggerPin = [16,40]
 triggerSet = [False, False]
 delay = 1800.0
 
-def trigger0(channel):
-    triggerSet[0]=True
+def daemon():
+    c = 0
+    while True:
+        time.sleep(0.01)
+        if GPIO.input(triggerPin[0]) == 1:
+            c += 1
+        else:
+            c = 0
+        if c == 5:
+            triggerSet[0] = True
 def trigger1(channel):
     triggerSet[1]=True
 
@@ -44,7 +53,9 @@ for pin in [dirPin, stepPin, sleepPin]:
     GPIO.setup(pin, GPIO.OUT, initial=GPIO.LOW)
 GPIO.setup(triggerPin[0], GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(triggerPin[1], GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.add_event_detect(triggerPin[0], GPIO.FALLING, callback=trigger0)
+d = threading.Thread(name='Daemon', target=daemon)
+d.setDaemon(True)
+d.start() # Event detect doesn't work because of fluctuations
 GPIO.add_event_detect(triggerPin[1], GPIO.RISING, callback=trigger1)
 
 posx = 0
@@ -60,7 +71,7 @@ def goTo(tx, ty):
     posy = ty
 
 def reset():
-    return # TODO fix button and reimplement function
+    #return # TODO fix button and reimplement function
     global posx, posy
     posx = RESET_POS[0]
     posy = RESET_POS[1]

@@ -71,7 +71,7 @@ def goTo(tx, ty):
     posy = ty
 
 def reset():
-    #return # TODO fix button and reimplement function
+    goTo(RESET_POS[0], RESET_POS[1])
     global posx, posy
     posx = RESET_POS[0]
     posy = RESET_POS[1]

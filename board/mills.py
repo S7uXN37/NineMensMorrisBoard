@@ -15,8 +15,8 @@ pygame.mixer.init()
 COLOR_AI = 1
 COORDS = [(0,0), (3,0), (6,0),    (1,1), (1,3), (1,5),    (2,2), (2,3), (2,4),    (3,0), (3,1), (3,2),    (3,4), (3,5), (3,6),    (4,2), (4,3), (4,4),    (5,1), (5,3), (5,5),    (6,0), (6,3), (6,6)]
 order_arr = [[8, 2, 0, 4, 6, 5, 1, 3, 7].index(x) for x in range(9)]  # which base field is accessed when (the first at time 8, the second at time 2)
-COORDS.extend([(-0.22+(6.44/8*x), -0.6) for x in order_arr])  # BASE_AI from 24 - 32
-COORDS.extend([(6.22-(6.44/8*x), 6.6) for x in order_arr])  # BASE_PLAYER from 33 - 41
+COORDS.extend([(-0.22+(6.44/8*x), -0.64) for x in order_arr])  # BASE_AI from 24 - 32
+COORDS.extend([(6.22-(6.44/8*x), 6.64) for x in order_arr])  # BASE_PLAYER from 33 - 41
 
 shutdownPin = 11
 ledPin = 3
@@ -43,7 +43,7 @@ def resolve(_i, context_board, base_color):
         return COORDS[_i], context_board[_i]
 
 def getShortSafePath(_board, start, target):
-    if dest == -1 or start == -1:
+    if target == -1 or start == -1:
         raise RuntimeError('Position in base must be resolved first')
     start_pos = COORDS[start]
     target_pos = COORDS[target]
@@ -161,7 +161,10 @@ try:
                 # move piece from start to dest
                 motors.goTo(c1[0], c1[1])
                 magnet.turnOn(color)
-                path = getShortSafePath(board, resolve_base(start, COLOR_AI), resolve_base(dest, -COLOR_AI))
+                if pieces_ai > 0 or count(board, COLOR_AI) <= 3:
+                    path = getShortSafePath(board, resolve_base(start, COLOR_AI), resolve_base(dest, -COLOR_AI))
+                else:
+                    path = [c1, c2]
                 for pos in path:
                     motors.goTo(pos[0], pos[1])
                 magnet.turnOff()

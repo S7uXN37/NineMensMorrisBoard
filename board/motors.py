@@ -4,7 +4,7 @@ import threading
 usleep = lambda x: time.sleep(x/1000.0/1000.0)
 
 coordToSteps = 2000.0 / 6.0
-RESET_POS = [-0.22, -0.6] # 6.6cm/grid -4cm/6.6=-0.6, -1.5cm/6.6=-0.22
+RESET_POS = [-0.22, -0.64] # 6.6cm/grid -4cm/6.6=-0.6, -1.5cm/6.6=-0.22
 
 # Mot1 on board, Mot2 below
 dirPin = [29,33]
@@ -32,6 +32,7 @@ def move(steps):
         GPIO.output(dirPin[j], GPIO.HIGH if steps[j]<0 else GPIO.LOW)
         GPIO.output(sleepPin[j], GPIO.HIGH)
         steps[j] = abs(steps[j])
+    time.sleep(0.15)
     for i in range(max(steps[0], steps[1])):
         for j in range(2):
             if i>=steps[j]:
@@ -43,6 +44,7 @@ def move(steps):
         d_start = 4000.0 #start delay
         f_i = (d_start-delay)/(t*t) * (i-t)*(i-t) + delay #calc delay
         usleep(f_i if i < t else delay)
+    time.sleep(0.1)
     for j in range(2):
         GPIO.output(sleepPin[j], GPIO.LOW)
 
@@ -78,7 +80,7 @@ def reset():
     for i in range(2):
         triggerSet[i] = (GPIO.input(triggerPin[i]) == 1)
     while not (triggerSet[0] and triggerSet[1]):
-        xy = [0 if triggerSet[0] else -1, 0 if triggerSet[1] else -1]
+        xy = [0 if triggerSet[0] else -10, 0 if triggerSet[1] else -10]
         move(xy)
 
 def shutdown():

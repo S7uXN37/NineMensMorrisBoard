@@ -11,8 +11,8 @@ SPI_DEVICE = 0
 CS = [18,26,22]
 mcp = Adafruit_MCP3008.MCP3008(spi=SPI.SpiDev(SPI_PORT, SPI_DEVICE))
 
-lower_bound = 505
-upper_bound = 540
+lower_bound = 500
+upper_bound = 547
 
 GPIO.setmode(GPIO.BOARD)
 for _cs in CS:

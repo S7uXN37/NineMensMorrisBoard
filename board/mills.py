@@ -78,6 +78,7 @@ def reset():
 
 
 def shutdown(channel=0):
+    print("Shutting down...")
     input.shutdown()
     motors.shutdown()
     magnet.shutdown()
@@ -167,13 +168,14 @@ try:
                 if dest == -1:  # after piece has been moved to the player's base, we can update pieces_taken
                     pieces_taken += 1
                 time.sleep(0.5)
-            motors.goTo(motors.RESET_POS[0], motors.RESET_POS[1])
+            motors.goTo(0, 0)
             motors.reset()
 
             if pieces_ai > 0:  # ASSUME AI uses all pieces from its storage before playing normally
                 pieces_ai -= 1
 
             old_board = input.readBoard()
+            print("board: " + str(old_board))
             if count(old_board, -COLOR_AI) < 3 and pieces_player == 0:  # AI just won
                 play_sound('../sounds/fanfare.wav')
                 reset()

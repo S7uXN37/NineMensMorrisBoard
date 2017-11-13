@@ -59,7 +59,7 @@ def calcMove(board, color, pieces_self, pieces_opponent):
         with open('log.csv', 'a') as f:
             f.write('\n%s, %f' % (depth, timeTaken))
     
-    return bestBoard, movesDone
+    return bestBoard.tolist(), movesDone
 
 def step(board, color, depth, pieces_self, pieces_opponent): # returns board (state of board after best move), score (value of board after best move), reward for that move, terminal if that move ends the game
     if depth <= 0:

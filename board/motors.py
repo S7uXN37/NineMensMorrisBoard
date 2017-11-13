@@ -30,7 +30,8 @@ def trigger1(channel):
 def move(steps):
     for j in range(2):
         GPIO.output(dirPin[j], GPIO.HIGH if steps[j]<0 else GPIO.LOW)
-        GPIO.output(sleepPin[j], GPIO.HIGH)
+        if not steps[j] == 0:
+            GPIO.output(sleepPin[j], GPIO.HIGH)
         steps[j] = abs(steps[j])
     time.sleep(0.15)
     for i in range(max(steps[0], steps[1])):
@@ -77,10 +78,13 @@ def reset():
     global posx, posy
     posx = RESET_POS[0]
     posy = RESET_POS[1]
-    for i in range(2):
-        triggerSet[i] = (GPIO.input(triggerPin[i]) == 1)
-    while not (triggerSet[0] and triggerSet[1]):
-        xy = [0 if triggerSet[0] else -10, 0 if triggerSet[1] else -10]
+    triggerSet[0] = (GPIO.input(triggerPin[0]) == 1)
+    while not triggerSet[0]:
+        xy = [-10, 0]
+        move(xy)
+    triggerSet[1] = (GPIO.input(triggerPin[1]) == 1)
+    while not triggerSet[1]:
+        xy = [0, -10]
         move(xy)
 
 def shutdown():

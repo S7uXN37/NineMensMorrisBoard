@@ -13,7 +13,7 @@ import pygame
 pygame.mixer.init()
 
 COLOR_AI = 1
-COORDS = [(0,0), (3,0), (6,0),    (1,1), (1,3), (1,5),    (2,2), (2,3), (2,4),    (3,0), (3,1), (3,2),    (3,4), (3,5), (3,6),    (4,2), (4,3), (4,4),    (5,1), (5,3), (5,5),    (6,0), (6,3), (6,6)]
+COORDS = [(0,0), (0,3), (0,6),    (1,1), (1,3), (1,5),    (2,2), (2,3), (2,4),    (3,0), (3,1), (3,2),    (3,4), (3,5), (3,6),    (4,2), (4,3), (4,4),    (5,1), (5,3), (5,5),    (6,0), (6,3), (6,6)]
 order_arr = [[8, 2, 0, 4, 6, 5, 1, 3, 7].index(x) for x in range(9)]  # which base field is accessed when (the first at time 8, the second at time 2)
 COORDS.extend([(-0.22+(6.44/8*x), -0.64) for x in order_arr])  # BASE_AI from 24 - 32
 COORDS.extend([(6.22-(6.44/8*x), 6.64) for x in order_arr])  # BASE_PLAYER from 33 - 41
@@ -148,7 +148,7 @@ try:
             if pieces_player > 0:  # ASSUME player uses all pieces from their storage before playing normally
                 pieces_player -= 1
 
-            _, moves = ai.calcMove(board, COLOR_AI, pieces_ai, pieces_player)
+            old_board, moves = ai.calcMove(board, COLOR_AI, pieces_ai, pieces_player)
             for move in moves:
                 start = move[0]
                 dest = move[1]
@@ -156,7 +156,7 @@ try:
 
                 # resolve coords of start and dest & color of piece
                 c1, color = resolve(start, board, COLOR_AI)  # can only move pieces out of own base
-                c2, _ = resolve(dest, board, -COLOR_AI)  # can only put pieces in opponents base
+                c2, _ = resolve(dest, board, COLOR_AI)  # can only put pieces in opponents base
 
                 # move piece from start to dest
                 motors.goTo(c1[0], c1[1])
@@ -177,7 +177,7 @@ try:
             if pieces_ai > 0:  # ASSUME AI uses all pieces from its storage before playing normally
                 pieces_ai -= 1
 
-            old_board = input.readBoard()
+            #old_board = input.readBoard()
             print("board: " + str(old_board))
             if count(old_board, -COLOR_AI) < 3 and pieces_player == 0:  # AI just won
                 play_sound('../sounds/fanfare.wav')

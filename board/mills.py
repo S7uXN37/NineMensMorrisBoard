@@ -76,14 +76,15 @@ def reset():
             magnet.turnOff()
             time.sleep(0.5)
 
-
+running = False
 def shutdown(channel=0):
+    if running:
+        return
     print("Shutting down...")
     input.shutdown()
     motors.shutdown()
     magnet.shutdown()
     GPIO.output(ledPin, GPIO.LOW)
-    GPIO.cleanup()
     quit()
     #os.system("sudo shutdown 0")
 
@@ -103,8 +104,8 @@ def play_sound(_path):
 try:
     GPIO.setup(ledPin, GPIO.OUT)
     GPIO.output(ledPin, GPIO.HIGH)
-    #GPIO.setup(shutdownPin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-    #GPIO.add_event_detect(shutdownPin, GPIO.RISING, callback=shutdown)
+    GPIO.setup(shutdownPin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.add_event_detect(shutdownPin, GPIO.RISING, callback=shutdown)
 
     print('Resetting motors...')
     motors.reset()
@@ -141,6 +142,7 @@ try:
                 if should_move:
                     print('Found move to %i without any closed mills' % pl_move_dest)
         if should_move:
+            running = True
             print('board: ' + str(board))
             play_sound('../sounds/ping.wav')
             print('calculating move... p_ai=%i p_pl=%i' % (pieces_ai, pieces_player))
@@ -183,6 +185,7 @@ try:
                 play_sound('../sounds/fanfare.wav')
                 reset()
                 continue
+            running = False
         else:
             time.sleep(1)
 except KeyboardInterrupt:

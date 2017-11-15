@@ -14,9 +14,11 @@ triggerPin = [16,40]
 triggerSet = [False, False]
 delay = 1800.0
 
+stop = False
+
 def daemon():
     c = 0
-    while True:
+    while not stop:
         time.sleep(0.01)
         if GPIO.input(triggerPin[0]) == 1:
             c += 1
@@ -90,3 +92,4 @@ def reset():
 def shutdown():
     GPIO.output(sleepPin[0], GPIO.LOW)
     GPIO.output(sleepPin[1], GPIO.LOW)
+    stop = True

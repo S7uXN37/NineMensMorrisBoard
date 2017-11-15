@@ -4,4 +4,6 @@ cd /home/pi/nine-mens-morris/board
 exec > logs/$DATE.log
 sudo pkill -f "python3 mills.py"
 python3 mills.py
-cd /
+if [ $? = 1 ]; then
+    sudo shutdown 5
+fi

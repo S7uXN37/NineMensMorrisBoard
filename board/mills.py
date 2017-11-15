@@ -7,7 +7,7 @@ import time
 import math
 import safe_path_generator as SPG
 import RPi.GPIO as GPIO
-import os
+import sys
 import pygame
 
 pygame.mixer.init()
@@ -76,8 +76,8 @@ def reset():
             magnet.turnOff()
             time.sleep(0.5)
 
-running = False
-def shutdown(channel=0):
+running = True
+def shutdown(channel=0, full=True):
     if running:
         return
     print("Shutting down...")
@@ -85,7 +85,10 @@ def shutdown(channel=0):
     motors.shutdown()
     magnet.shutdown()
     GPIO.output(ledPin, GPIO.LOW)
-    os.system("sudo shutdown 0")
+    if full:
+        sys.exit(1)
+    else:
+        sys.exit(0)
 
 def count(_board, _color):
     num = 0
@@ -109,6 +112,7 @@ try:
     print('Resetting motors...')
     motors.reset()
     while True:
+        running = False
         print('Checking board...')
         board = input.readBoard()
         should_move = False
@@ -188,4 +192,4 @@ try:
         else:
             time.sleep(1)
 except KeyboardInterrupt:
-    shutdown()
+    shutdown(full=False)

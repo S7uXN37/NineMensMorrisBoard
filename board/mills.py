@@ -85,8 +85,7 @@ def shutdown(channel=0):
     motors.shutdown()
     magnet.shutdown()
     GPIO.output(ledPin, GPIO.LOW)
-    quit()
-    #os.system("sudo shutdown 0")
+    os.system("sudo shutdown 0")
 
 def count(_board, _color):
     num = 0

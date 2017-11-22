@@ -14,7 +14,9 @@ NODES = [(0.5, 0.5), (2, 0.5), (3, 0.5), (4, 0.5), (5.5, 0.5),  # nodes 0-4
          (1.39, -0.64), (4.61, -0.64), (1.39, 6.64), (4.61, 6.64)  # nodes in base, 32 & 33 in AI, 34 & 35 in player
          ]  # node at INDEX has coordinates VALUE
 for i, val in enumerate(NODES):  # reverse due to wrong use of coordinate system
-    NODES[i] = val[::-1]  # TODO something's not right when taking pieces
+    if i >= 32:
+        continue
+    NODES[i] = val[::-1]
 CONNECTIONS = [[1, 10],  [0, 2, 6],    [1, 3],   [2, 4, 8],    [3, 13],   # nodes 0-4
                [6, 11],  [1, 5, 7],    [6, 8],   [3, 7, 9],    [8, 12],   # nodes 5-9
                [0, 11, 14, 32],    [5, 10, 15],  [9, 13, 16],  [4, 12, 17, 34],   # nodes 10-13
@@ -22,7 +24,7 @@ CONNECTIONS = [[1, 10],  [0, 2, 6],    [1, 3],   [2, 4, 8],    [3, 13],   # node
                [14, 19, 27, 33],   [15, 18, 22], [16, 21, 26], [17, 20, 31, 35],  # nodes 18-21
                [19, 23], [22, 24, 28], [23, 25], [24, 26, 30], [20, 25],  # nodes 22-26
                [18, 28], [23, 27, 29], [28, 30], [25, 29, 31], [21, 30],  # nodes 27-31
-               [10], [18], [13], [21]  # nodes in base, 32-35
+               [0, 10], [18, 27], [4, 13], [21, 31]  # nodes in base, 32-35
                ]  # node at INDEX is connected to all nodes in VALUE
 ACCESS_POINTS = [[0],       [2],       [4],
                  [0, 5],    [2, 7],    [4, 9],
@@ -85,7 +87,7 @@ def generate(start_ind, end_ind):
             path, dist = astar(s, e)
             if dist < mind_dist:
                 mind_dist = dist
-                best_path = []
+                best_path = [NODES[s]]
                 for p in path:
                     best_path.append(NODES[p])
     return best_path

@@ -1,36 +1,59 @@
 #!/usr/bin/env python
-import mills_old
-import numpy as np
 import pygame
-game = mills_old.GameState()
-done = False
+import ai, mills
+
+COLOR_AI = 1
+pieces_ai = 9
+pieces_player = 9
+
+RESET_POS = (-0.22, -0.64)
+
+live_path = [RESET_POS]
+
 try:
-    skip_player = True
-    while not done:
-        try:
-            print()
-            print('--------- YOUR TURN ---------')
-            if game.player_num_pieces > 0:
-                print('you still have %d pieces to set down freely' % game.player_num_pieces)
-            print('select origin (will only matter, if applicable)')
-            start = mills_old.blockGetClickIndex()
-            print('start = %d; select destination' % start)
-            dest = mills_old.blockGetClickIndex()
-            print('dest = %d; select piece to take (will only matter, if applicable)' % dest)
-            take = mills_old.blockGetClickIndex()
-            print('take = %d' % take)
-            
-            x = np.ones(24)
-            x[take] = 1.5
-            x[start] = 0
-            x[dest] = 2
-            
-            print()
-            print('--------- AI TURN ---------')
-            _,_,done = game.frame_step(x, skip_player=skip_player)
-            skip_player = False
-        except IndexError:
-            print('invalid click registred, try again')
+    # PLAYER MOVE
+    board = [0 for i in range(24)]
+    _start = int(input("Start: "))
+    _dest = int(input("Dest: "))
+    if ai.isInMill(board, _dest):
+        _take = int(input("Take: "))
+    else:
+        _take = -1
+    board[_start] = 0
+    board[_dest] = -COLOR_AI
+    if _take != -1:
+        board[_take] = 0
+    pieces_player = max(0, pieces_player-1)
+
+    # AI RESPONSE
+    _, moves = ai.calcMove(board, COLOR_AI, pieces_ai, pieces_player)
+    pieces_ai = max(0, pieces_ai-1)
+    # SHOW EXECUTION PATH
+    for move in moves:
+        start = move[0]
+        dest = move[1]
+        print('move: ', move[0], 'to', move[1])
+
+        # resolve coords of start and dest & color of piece
+        c1, color = mills.resolve(start, board, COLOR_AI)  # can only move pieces out of own base
+        c2, _ = mills.resolve(dest, board, COLOR_AI)  # can only put pieces in opponents base
+
+        # move piece from start to dest
+        live_path.append((c1,c2))
+        #magnet.turnOn(color)
+        if start == -1 or mills.count(board, COLOR_AI) <= 3 or dest == -1:
+            path = mills.getShortSafePath(board, mills.resolve_base(start, COLOR_AI), resolve_base(dest, -COLOR_AI))
+        else:
+            path = [c1, c2]
+        for pos in path:
+            live_path.append(pos)
+        # WAIT
+        input("ENTER to continue...")
+        # CLEAR PATH
+        tmp = live_path[-1]
+        live_path = [tmp]
+    live_path.append((0,0))
+    live_path.append(RESET_POS)
 except KeyboardInterrupt:
-    print('test_human.py received interrupt')
+    print('Interrupted!')
     pygame.quit()

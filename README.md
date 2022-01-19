@@ -21,8 +21,10 @@ By the end, the algorithm then chosses the move with which the best board value 
 
 Number of pieces:
 - This is important to include as the main way to win in Nine Mens Morris is to bring your opponent down to 2 pieces so we wan't our AI to do whatever is possible to avoid losing. Furthermore, having more pieces gives more opprotunities to make mills.
+
 Number of possible moves:
 - When the number of possible moves goes down this makes more likely that we could reach a point where we get trapped which would cause the AI to lose. Having a lower number of possible moves could also be correlated to having less pieces which we also want to avoid.
+
 Number of mills:
 - The most common way to win is by taking away all but 2 of the opponents pieces and to do that we need mills. It's important our AI choses moves that causes them to get mills so it actually wins instead of being at a stalemate just trying to survive.
 

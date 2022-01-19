@@ -17,6 +17,19 @@ That value is calculated for both players and the state is assigned the differen
 The algorithm then collapses the tree by assuming that both players play optimally, always trying to maximize the value of the board for them.
 By the end, the algorithm then chosses the move with which the best board value can be guaranteed.
 
+## Reasoning Behind Heuristics
+
+Number of pieces:
+- This is important to include as the main way to win in Nine Mens Morris is to bring your opponent down to 2 pieces so we wan't our AI to do whatever is possible to avoid losing. Furthermore, having more pieces gives more opprotunities to make mills.
+Number of possible moves:
+- When the number of possible moves goes down this makes more likely that we could reach a point where we get trapped which would cause the AI to lose. Having a lower number of possible moves could also be correlated to having less pieces which we also want to avoid.
+Number of mills:
+- The most common way to win is by taking away all but 2 of the opponents pieces and to do that we need mills. It's important our AI choses moves that causes them to get mills so it actually wins instead of being at a stalemate just trying to survive.
+
+## Possible Additional Heuristics
+- Number of intersections held. Intersections are very beneficial as they give you the most opprotunities to move either blocking a mill from your opponent or making one of your own
+- Number of 2 in a row pieces: Before you create a mill often you start with 2 pieces in a row. As we want our AI to win it'd be a good idea to encourage it to make 2 in a row so it can make mills from there.
+
 ## Results:
 
 **The Algorithm** can be run by executing:
